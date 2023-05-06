@@ -7,8 +7,8 @@
 
 #define PORTNUM 5678UL
 #define SERVER_VERSION "udp_srv_vadym_shesterikov_29032023\n"
-#define SUCCESS_MSG "OK\n"
-#define FAIL_MSG "ERROR\n"
+#define SUCCESS_MSG "OK\r\n"
+#define FAIL_MSG "ERROR\r\n"
 #define UDP_SERVER_PRINTF(...)
 
 static struct sockaddr_in serv_addr, client_addr;
@@ -135,11 +135,13 @@ void StartUdpServerTask(void const * argument)
 
 			if (strncmp(buffer + 5, "status", strlen("status")) == 0)
 			{
+				buffer[0] = 'L';
+				buffer[1] = 'E';
+				buffer[2] = 'D';
+				msg_len += 5;
 				pinState = HAL_GPIO_ReadPin(GPIO_PORT[act_led], GPIO_PIN[act_led]);
-				strcpy(buffer, ((pinState == GPIO_PIN_RESET) ? "OFF\n" : "ON\n"));
-				msg_len += (pinState == GPIO_PIN_RESET) ? strlen("OFF\n") : strlen("ON\n");
-				strcpy(buffer + msg_len, SUCCESS_MSG);
-				msg_len += strlen(SUCCESS_MSG);
+				strcpy(buffer + msg_len, ((pinState == GPIO_PIN_RESET) ? "OFF\r\n" : "ON\r\n"));
+				msg_len += (pinState == GPIO_PIN_RESET) ? strlen("OFF\r\n") : strlen("ON\r\n");
 				sendto(socket_fd, buffer, msg_len, 0, (struct sockaddr *)&client_addr, addr_len);
 				continue;
 			}
